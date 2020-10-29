@@ -36,16 +36,17 @@ function Do-SystemPath {
   }
 }
 
-function Do-RegisterServer {
+function Do-RegisterSvr {
   param (
-    [ValidateScript({ Test-Path -Path $_ -PathType Container })]
-    [string]$BinPath,
-    [ValidateScript({ Test-Path -Path "$BinPath\$_" -PathType Leaf })]
-    [string]$ServerFileName
-  ) 
+    [ValidateScript({ Test-Path -Path $_ -PathType Leaf })]
+    [string]$RegSvr,
+    [ValidateScript({ Test-Path -Path $_ -PathType Leaf })]
+    [string]$FileName
+  )
 
   $shell = New-Object -ComObject WScript.Shell
-  $shell.Run("$BinPath\tregsvr.exe $BinPath\$ServerFileName")
+  echo ($RegSvr, $FileName -join ' ')
+  $shell.Run("$RegSvr $FileName")
 }
 
 function Do-ComputerName ($RegisteredName) {
@@ -64,18 +65,20 @@ function Do-ComputerName ($RegisteredName) {
 $BDSVersion = "21.0"
 $Root = $(Split-Path -Path $PSCommandPath).TrimEnd('\')
 $BDSRoot = $(Split-Path -Path $PSCommandPath).TrimEnd('\'), "$BDSVersion" -join '\'
+$BDSBin = $BDSRoot, 'bin' -join '\'
+$BDSBin64 = $BDSRoot, 'bin64' -join '\'
+$tregsvr = $BDSBin, "tregsvr.exe" -join '\'
+$tregsvr64 = $BDSBin64, "tregsvr.exe" -join '\'
 
 #Do-Registry (($Root, "$BDSVersion.reg") -join '\')
 Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
 Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:Public\Documents\Embarcadero\Studio\$BDSVersion")
 Do-SystemPath (($BDSRoot, 'bin') -join '\')
 Do-SystemPath (($BDSRoot, 'bin64') -join '\')
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Borland.Build.Tasks.Common.tlb'
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Borland.Studio.Interop.tlb'
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Borland.Studio.ToolsAPI.tlb'
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Embarcadero.Studio.Modeling.tlb'
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'midas.dll'
-Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'getithelper270.dll'
+
+Get-ChildItem -Depth 1 -Path $BDSBin -Include *.tlb | foreach { Do-RegisterSvr $tregsvr $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include midas.dll, getithelper270.dll | foreach { Do-RegisterSvr $tregsvr $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin64 -Include midas.dll | foreach { Do-RegisterSvr $tregsvr64 $_.FullName }
 Copy-Item -Recurse -Force (($Root, 'License', '*') -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:ProgramData\Embarcadero")
 #Do-ComputerName 'WINDOWS'
 Pause
