@@ -69,6 +69,7 @@ $BDSBin = $BDSRoot, 'bin' -join '\'
 $BDSBin64 = $BDSRoot, 'bin64' -join '\'
 $tregsvr = $BDSBin, "tregsvr.exe" -join '\'
 $tregsvr64 = $BDSBin64, "tregsvr.exe" -join '\'
+$RegAsm = $Env:SystemRoot, "Microsoft.NET\Framework\v4.0.30319\RegAsm.exe" -join '\'
 
 #Do-Registry (($Root, "$BDSVersion.reg") -join '\')
 Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
@@ -76,6 +77,8 @@ Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -
 Do-SystemPath (($BDSRoot, 'bin') -join '\')
 Do-SystemPath (($BDSRoot, 'bin64') -join '\')
 
+Get-ChildItem -Depth 1 -Path $BDSBin -Include Borland.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include Embarcadero.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin -Include *.tlb | foreach { Do-RegisterSvr $tregsvr $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin -Include midas.dll, getithelper270.dll | foreach { Do-RegisterSvr $tregsvr $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin64 -Include midas.dll | foreach { Do-RegisterSvr $tregsvr64 $_.FullName }
