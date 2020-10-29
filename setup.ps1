@@ -4,17 +4,6 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
   Exit (Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath" -Verb RunAs -Wait -PassThru).ExitCode
 }
 
-function Do-License {
-  param (
-    [ValidateScript({ Test-Path -Path $_ -PathType Container })]
-    [string]$LicensePath
-  )
-
-  Get-ChildItem $LicensePath -Force | % {
-    Copy-Item $_.FullName -destination "$Env:ProgramData\Embarcadero" -Recurse -Force
-  }
-}
-
 function Do-Shortcut($WorkingDir, $ShortFileName, $Arguments) {
   $shell = New-Object -ComObject WScript.Shell
   $shortcut = $shell.CreateShortcut($Env:ProgramData + "\Microsoft\Windows\Start Menu\Programs\" + "$ShortFileName.lnk")
@@ -86,6 +75,6 @@ Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Borland.Studio.ToolsAPI.tlb'
 Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Embarcadero.Studio.Modeling.tlb'
 Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'midas.dll'
 Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'getithelper270.dll'
-Do-License (($Root, 'License') -join '\')
+Copy-Item -Recurse -Force (($Root, 'License', '*') -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:ProgramData\Embarcadero")
 #Do-ComputerName 'WINDOWS'
 Pause
