@@ -74,6 +74,7 @@ $RegAsm = $Env:SystemRoot, "Microsoft.NET\Framework\v4.0.30319\RegAsm.exe" -join
 #Do-Registry (($Root, "$BDSVersion.reg") -join '\')
 Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
 Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:Public\Documents\Embarcadero\Studio\$BDSVersion")
+Get-ChildItem -depth 1 -Path $BDSBin -Include *.cfg, rsvars.bat | foreach { (Get-Content -Raw -Path $_.FullName) -replace [regex]::escape('c:\program files (x86)\embarcadero\studio'), [regex]::escape($Root) | Set-Content -Path $_.FullName }
 Do-SystemPath (($BDSRoot, 'bin') -join '\')
 Do-SystemPath (($BDSRoot, 'bin64') -join '\')
 
