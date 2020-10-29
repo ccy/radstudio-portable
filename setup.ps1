@@ -67,6 +67,7 @@ $BDSRoot = $(Split-Path -Path $PSCommandPath).TrimEnd('\'), "$BDSVersion" -join 
 
 #Do-Registry (($Root, "$BDSVersion.reg") -join '\')
 Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
+Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:Public\Documents\Embarcadero\Studio\$BDSVersion")
 Do-SystemPath (($BDSRoot, 'bin') -join '\')
 Do-SystemPath (($BDSRoot, 'bin64') -join '\')
 Do-RegisterServer (($BDSRoot, 'bin') -join '\') 'Borland.Build.Tasks.Common.tlb'
