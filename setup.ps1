@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-  Exit (Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath" -Verb RunAs -Wait -PassThru).ExitCode
+  Exit (Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File $PSCommandPath $args" -Verb RunAs -Wait -PassThru).ExitCode
 }
 
 function Do-Shortcut($WorkingDir, $ShortFileName, $Arguments) {
@@ -40,13 +40,14 @@ function Do-RegisterSvr {
   param (
     [ValidateScript({ Test-Path -Path $_ -PathType Leaf })]
     [string]$RegSvr,
+    [string]$RegSvrParams,
     [ValidateScript({ Test-Path -Path $_ -PathType Leaf })]
     [string]$FileName
   )
 
   $shell = New-Object -ComObject WScript.Shell
-  echo ($RegSvr, $FileName -join ' ')
-  $shell.Run("$RegSvr $FileName")
+  Write-Host $RegSvr, $RegSvrParams, $FileName
+  $shell.Run("$RegSvr $RegSvrParams $FileName")
 }
 
 function Do-ComputerName ($RegisteredName) {
@@ -62,6 +63,7 @@ function Do-ComputerName ($RegisteredName) {
   }
 }
 
+$IsUninstall = $args[0] -ieq "uninstall"
 $BDSVersion = "21.0"
 $Root = $(Split-Path -Path $PSCommandPath).TrimEnd('\')
 $BDSRoot = $(Split-Path -Path $PSCommandPath).TrimEnd('\'), "$BDSVersion" -join '\'
@@ -69,20 +71,28 @@ $BDSBin = $BDSRoot, 'bin' -join '\'
 $BDSBin64 = $BDSRoot, 'bin64' -join '\'
 $tregsvr = $BDSBin, "tregsvr.exe" -join '\'
 $tregsvr64 = $BDSBin64, "tregsvr.exe" -join '\'
+$tregsvrParams = if ($IsUninstall) { "-u" } else { "" }
 $RegAsm = $Env:SystemRoot, "Microsoft.NET\Framework\v4.0.30319\RegAsm.exe" -join '\'
+$RegAsmParams = if ($IsUninstall) { "/unregister" } else { "" }
 
-#Do-Registry (($Root, "$BDSVersion.reg") -join '\')
-Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
-Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:Public\Documents\Embarcadero\Studio\$BDSVersion")
-Get-ChildItem -depth 1 -Path $BDSBin -Include *.cfg, rsvars.bat | foreach { (Get-Content -Raw -Path $_.FullName) -replace [regex]::escape('c:\program files (x86)\embarcadero\studio'), [regex]::escape($Root) | Set-Content -Path $_.FullName }
-Do-SystemPath (($BDSRoot, 'bin') -join '\')
-Do-SystemPath (($BDSRoot, 'bin64') -join '\')
+if (! $IsUninstall) {
+  #Do-Registry (($Root, "$BDSVersion.reg") -join '\')
+  Do-Shortcut (($BDSRoot, 'bin') -join '\') "Delphi 10.4" "-pDelphi"
+  Copy-Item -Recurse -Force -Path ($Root, "Public\$BDSVersion\Styles" -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:Public\Documents\Embarcadero\Studio\$BDSVersion")
+  Get-ChildItem -depth 1 -Path $BDSBin -Include *.cfg, rsvars.bat | foreach { (Get-Content -Raw -Path $_.FullName) -replace [regex]::escape('c:\program files (x86)\embarcadero\studio'), [regex]::escape($Root) | Set-Content -Path $_.FullName }
+  Do-SystemPath (($BDSRoot, 'bin') -join '\')
+  Do-SystemPath (($BDSRoot, 'bin64') -join '\')
+}
 
 Get-ChildItem -Depth 1 -Path $BDSBin -Include Borland.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin -Include Embarcadero.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin -Include *.tlb | foreach { Do-RegisterSvr $tregsvr $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin -Include midas.dll, getithelper270.dll | foreach { Do-RegisterSvr $tregsvr $_.FullName }
 Get-ChildItem -Depth 1 -Path $BDSBin64 -Include midas.dll | foreach { Do-RegisterSvr $tregsvr64 $_.FullName }
-Copy-Item -Recurse -Force (($Root, 'License', '*') -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:ProgramData\Embarcadero")
-#Do-ComputerName 'WINDOWS'
+
+if (! $IsUninstall) {
+  Copy-Item -Recurse -Force (($Root, 'License', '*') -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:ProgramData\Embarcadero")
+  #Do-ComputerName 'WINDOWS'
+}
+
 Pause

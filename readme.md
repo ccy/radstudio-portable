@@ -53,6 +53,10 @@ A portable `RAD Studio` requires some configuration to make it works in new mach
 
 The portable installation is done.
 
-# Setup Portable RAD Studio
+# Install Portable RAD Studio
 
-Clone and mount `RAD Studio` storage device folowed by `setup.cmd`.
+Clone and mount `RAD Studio` storage device folowed by `install.cmd`.
+
+# Uninstall Portable RAD Studio
+
+It is good practice clean up all registered DLLs in current installation before install new version of RAD Studio.
