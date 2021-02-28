@@ -4,11 +4,13 @@ Embarcadero [RAD Studio](https://www.embarcadero.com/products/rad-studio/) usual
 
 The whole installation process consume quite some times.  This guide shows how to prepare RAD Studio installation as portable application to avoid time consuming installation process.
 
-# Prepare Portable installation
+# Prepare Portable Installation
 
 ## Install RAD Studio
 
 First, install `RAD Studio` in default location.  Select all available platforms and libraries when possible.
+
+**Interbase Developer Editon** is an individual package that can install by user anytime.  It is not necessary to include in the portable prepartion.
 
 ## Install additional packages
 
@@ -22,11 +24,11 @@ Next, Prepare an empty directory or even better prepare a [virtual hard disk](ht
 
 Next, copy all files and folders to the storage device:
 
-    c:\> robocopy /E %ProgramFiles(x86)%\Embarcadero\Studio <mount-point>
+    c:\> robocopy /E "%ProgramFiles(x86)%\Embarcadero\Studio" <mount-point>
 
 And the `public` folders:
 
-    c:\> robocopy /E %Public%\Documents\Embarcadero\Studio <mount-point>\Public
+    c:\> robocopy /E "%Public%\Documents\Embarcadero\Studio" <mount-point>\Public
 
 ## Backup default registry entries
 
@@ -42,8 +44,7 @@ RAD Studio requires valid license slip to work properly.  Make backup of the lic
 
 ```cmd
 c:\> mkdir <mount-point>\License
-c:\> copy "%ProgramData%\Embarcadero\.licenses\.cg_license" <mount-point>\License\.License
-c:\> copy "%ProgramData%\Embarcadero\reg*.txt <mount-point>\License
+c:\> robocopy /E "%ProgramData%\Embarcadero" <mount-point>\License
 ```
 
 ## Prepare automated setup script
@@ -54,4 +55,4 @@ The portable installation is done.
 
 # Setup Portable RAD Studio
 
-It is easy to deploy the portable RAD Studio.  Just clone `RAD Studio` storage device and execute `setup.cmd`.
+Clone and mount `RAD Studio` storage device folowed by `setup.cmd`.
