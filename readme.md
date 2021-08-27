@@ -10,7 +10,7 @@ The whole installation process consume quite some times.  This guide shows how t
 
 First, install `RAD Studio` in default location.  Select all available platforms and libraries when possible.
 
-**Interbase Developer Editon** is an individual package that can install by user anytime.  It is not necessary to include in the portable prepartion.
+**Interbase Developer Editon** is an individual package that can install by user anytime.  It is not necessary to include in the portable preparation.
 
 ## Install additional packages
 
@@ -55,7 +55,7 @@ The portable installation is done.
 
 # Install Portable RAD Studio
 
-Clone and mount `RAD Studio` storage device folowed by `install.cmd`.
+Clone and mount `RAD Studio` storage device followed by `install.cmd`.
 
 # Uninstall Portable RAD Studio
 
