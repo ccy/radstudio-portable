@@ -84,11 +84,11 @@ if (! $IsUninstall) {
   Do-SystemPath (($BDSRoot, 'bin64') -join '\')
 }
 
-Get-ChildItem -Depth 1 -Path $BDSBin -Include Borland.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
-Get-ChildItem -Depth 1 -Path $BDSBin -Include Embarcadero.*.dll | foreach { Do-RegisterSvr $RegAsm $_.FullName }
-Get-ChildItem -Depth 1 -Path $BDSBin -Include *.tlb | foreach { Do-RegisterSvr $tregsvr $_.FullName }
-Get-ChildItem -Depth 1 -Path $BDSBin -Include midas.dll, getithelper270.dll | foreach { Do-RegisterSvr $tregsvr $_.FullName }
-Get-ChildItem -Depth 1 -Path $BDSBin64 -Include midas.dll | foreach { Do-RegisterSvr $tregsvr64 $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include Borland.*.dll | foreach { Do-RegisterSvr $RegAsm $RegAsmParams $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include Embarcadero.*.dll | foreach { Do-RegisterSvr $RegAsm $RegAsmParams $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include *.tlb | foreach { Do-RegisterSvr $tregsvr $tregsvrParams $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin -Include midas.dll, getithelper270.dll | foreach { Do-RegisterSvr $tregsvr $tregsvrParams $_.FullName }
+Get-ChildItem -Depth 1 -Path $BDSBin64 -Include midas.dll | foreach { Do-RegisterSvr $tregsvr64 $tregsvrParams $_.FullName }
 
 if (! $IsUninstall) {
   Copy-Item -Recurse -Force (($Root, 'License', '*') -join '\') -Destination (New-Item -Force -Type Directory -Path "$Env:ProgramData\Embarcadero")
