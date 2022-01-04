@@ -12,23 +12,37 @@ First, install `RAD Studio` in default location.  Select all available platforms
 
 **Interbase Developer Editon** is an individual package that can install by user anytime.  It is not necessary to include in the portable preparation.
 
-## Install additional packages
+## Install Patch
 
-Next, launch RAD Studio and install additional package from [GetIt Package Manager](http://docwiki.embarcadero.com/RADStudio/Sydney/en/GetIt_Package_Manager).  For example: [Ribbon Classic Control](http://docwiki.embarcadero.com/RADStudio/Sydney/en/Ribbon_Controls)
+If Zip archive patch is available the RAD Studio, it usually patch files in `bin*` folder but won't patch `Redist`.
+
+To update files in `Redist` folder:
+
+```
+# Navigate to Redist folder
+cd Redist`
+
+# Process *.redistlist
+redistsetup.exe Default
+```
 
 ## Prepare storage device
 
 Next, Prepare an empty directory or even better prepare a [virtual hard disk](https://docs.microsoft.com/en-us/windows-server/storage/disk-management/manage-virtual-hard-disks) (VHDX) to store the installtion binaries.
 
+Mount the VHDX to a mount point. e.g.: `E:\`
+
+    c:\> set MOUNT=E:\
+
 ## Copy Files
 
 Next, copy all files and folders to the storage device:
 
-    c:\> robocopy /E "%ProgramFiles(x86)%\Embarcadero\Studio" <mount-point>
+    c:\> robocopy /E "%ProgramFiles(x86)%\Embarcadero\Studio" %MOUNT%
 
 And the `public` folders:
 
-    c:\> robocopy /E "%Public%\Documents\Embarcadero\Studio" <mount-point>\Public
+    c:\> robocopy /E "%Public%\Documents\Embarcadero" %MOUNT%\Public
 
 ## Backup default registry entries
 
@@ -36,7 +50,7 @@ RAD Studio installer add entries to registry in `HKEY_LOCAL_MACHINE`, backup the
 
 Backup `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Embarcadero` registry item:
 
-    c:\> reg export HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Embarcadero <mount-point>\21.0.reg
+    c:\> reg export HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Embarcadero %MOUNT%\22.0.reg
 
 ## Copy license files
 
@@ -44,7 +58,7 @@ RAD Studio requires valid license slip to work properly.  Make backup of the lic
 
 ```cmd
 c:\> mkdir <mount-point>\License
-c:\> robocopy /E "%ProgramData%\Embarcadero" <mount-point>\License
+c:\> robocopy /E "%ProgramData%\Embarcadero" %MOUNT%\License
 ```
 
 ## Prepare automated setup script
