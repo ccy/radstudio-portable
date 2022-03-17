@@ -20,7 +20,7 @@ To update files in `Redist` folder:
 
 ```
 # Navigate to Redist folder
-cd Redist`
+cd Redist
 
 # Process *.redistlist
 redistsetup.exe Default
@@ -28,7 +28,7 @@ redistsetup.exe Default
 
 ## Prepare storage device
 
-Next, Prepare an empty directory or even better prepare a [virtual hard disk](https://docs.microsoft.com/en-us/windows-server/storage/disk-management/manage-virtual-hard-disks) (VHDX) to store the installtion binaries.
+Next, Prepare an empty directory or even better prepare a [virtual hard disk](https://docs.microsoft.com/en-us/windows-server/storage/disk-management/manage-virtual-hard-disks) (VHDX) to store the installation binaries.
 
 Mount the VHDX to a mount point. e.g.: `E:\`
 
@@ -57,7 +57,7 @@ Backup `HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Embarcadero` registry item:
 RAD Studio requires valid license slip to work properly.  Make backup of the license files:
 
 ```cmd
-c:\> mkdir <mount-point>\License
+c:\> mkdir %MOUNT%\License
 c:\> robocopy /E "%ProgramData%\Embarcadero" %MOUNT%\License
 ```
 
