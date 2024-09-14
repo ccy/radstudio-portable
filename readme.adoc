@@ -1,0 +1,128 @@
+:radversion: 23.0
+:slash: \
+
+== Introduction
+
+Embarcadero https://www.embarcadero.com/products/rad-studio/[RAD Studio] usually install via ISO file or Web based installer.  The default installation path is:
+
+ ${env:ProgramFiles(x86)}\Embarcadero\Studio
+
+The whole installation process consume quite some times.  This guide shows how to prepare RAD Studio installation as portable application to avoid time consuming installation process.
+
+== Prepare Portable Installation
+
+=== Install Java SDK
+
+Some platform of RAD Studio may require Java SDK:
+
+ winget install "Eclipse Temurin JDK with Hotspot"
+
+=== Install RAD Studio
+
+First, install `RAD Studio` in default location.  Select all available platforms and libraries when possible.
+
+**Interbase Developer Editon** is an individual package that can install by user anytime.  It is not necessary to include in the portable preparation.
+
+=== Optional: Install Patch
+
+Deploy RAD Studio zip patch if available.
+
+=== Recommended: Update Redist folder
+
+After installation or patch, the official RAD Studio distribution might have forgotten to deliver valid files in the `redist` folder.  Use `redistsetup` to update manually.
+
+[source,powershell]
+--
+# Navigate to Redist folder
+cd Redist
+
+# Process *.redistlist
+redistsetup.exe Default
+--
+
+=== Prepare storage device
+
+Next, Prepare an empty directory or even better prepare a https://docs.microsoft.com/en-us/windows-server/storage/disk-management/manage-virtual-hard-disks[virtual hard disk] (VHDX) to store the installation binaries.
+
+Mount the VHDX to a mount point. e.g.: `E:\`
+
+[source,powershell]
+----
+$MOUNT="E:\"
+----
+
+=== Copy Files
+
+[source,powershell, subs="attributes"]
+----
+# Copy all files and folders to the storage device:
+robocopy /E "$Env:ProgramFiles (x86)\Embarcadero\Studio" $MOUNT
+
+# Delete uninstaller files
+Remove-Item -Path "${MOUNT}{radversion}\unins*.exe"
+Remove-Item -Path "${MOUNT}{radversion}\unins*.dat"
+
+# and public folder
+robocopy /E "$Env:Public\Documents\Embarcadero" $MOUNT\Public
+----
+
+=== Backup default registry entries
+
+RAD Studio installer add entries to registry in `HKEY_LOCAL_MACHINE`, backup the registry:
+
+[source,powershell, subs="attributes"]
+----
+reg export HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Embarcadero ${MOUNT}{slash}{radversion}.reg
+----
+
+=== Copy license files
+
+RAD Studio requires valid license slip to work properly.  Make backup of the license files:
+
+[source,powershell]
+----
+mkdir $MOUNT\License
+robocopy /E "$Env:ProgramData\Embarcadero" $MOUNT\License
+----
+
+=== Prepare automated setup script
+
+A portable `RAD Studio` requires some configuration to make it works in new machine.  A simple setup cmd and powershell scripts is available: `setup.cmd` and `setup.ps1`
+
+The portable installation is done.
+
+=== Manage RAD Studio installation with WIM
+
+Storing RAD Studio installation in virtual hard disk allow future re-use.  Each RAD Studio version will release few patches or updates in it's life time.  Using virtual hard disk to store RAD Studio installation shall result to many virtual disk files.
+
+Most files remain unchanged among those patches or updates release for same RAD Studio version.  Storing images to a single https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/capture-and-apply-an-image[Windows Imaging File or WIM] is particularly suitable as file size won't over grow among patches or updates.
+
+[source,powershell]
+----
+# Define RAD Studio WIM file
+$WIM="c:\radstudio.wim"
+$NAME="RAD Studio"
+
+# Capture an image
+New-WindowsImage -ImagePath $WIM -CapturePath d:\ -CompressionType Max -Description $NAME -Name $NAME
+
+# Append new image
+$NAME="RAD Studio Patch"
+Add-WindowsImage -ImagePath $WIM -CapturePath D:\ -Name $NAME -Description $NAME
+
+# List images
+Get-WindowsImage -ImagePath $WIM
+
+# Extract Image
+Expand-WindowsImage -ImagePath $WimFile -ApplyPath "D:\" -Index 1
+----
+
+NOTE: The WIM file image can extract with https://www.7-zip.org/[7-Zip] too.
+
+== Install Portable RAD Studio
+
+Clone and mount `RAD Studio` storage device followed by `install.cmd`.
+
+== Uninstall Portable RAD Studio
+
+It is good practice clean up all registered DLLs in current installation before install new version of RAD Studio.
